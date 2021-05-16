@@ -1,7 +1,7 @@
 import { Contract, Gateway, GatewayOptions, Wallet } from 'fabric-network';
 import * as ccp from '../../assets/connection-config.json';
 
-const channelName = 'mychannel';
+const channelName = 'grade-book-channel';
 const chaincodeName = 'grade-book';
 
 export async function getContract(username: string, contractName: string, wallet: Wallet): Promise<Contract> {
