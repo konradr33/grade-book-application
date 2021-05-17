@@ -1,8 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Wallet, Wallets } from 'fabric-network';
+import { Contract, Wallet, Wallets } from 'fabric-network';
 import * as FabricCAServices from 'fabric-ca-client';
 
 import * as ccp from '../../../assets/connection-config.json';
+import { getContract } from '../../utils/gateway';
 
 @Injectable()
 export class EnrollService {
@@ -17,11 +18,11 @@ export class EnrollService {
     this.wallet = await EnrollService.buildWallet();
   }
 
-  public async enrollUser(login: string, password: string) {
-    console.log('enrollUser ', login, password);
+  public async enrollUser(username: string, password: string): Promise<{ role: string }> {
+    console.log('enrollUser ', username, password);
     try {
       const enrollment = await this.caClient.enroll({
-        enrollmentID: login,
+        enrollmentID: username,
         enrollmentSecret: password,
         attr_reqs: [
           { name: 'hf.EnrollmentID', optional: false },
@@ -36,17 +37,23 @@ export class EnrollService {
         mspId: this.mspID,
         type: 'X.509',
       };
-      console.log('enrolled', enrollment.certificate);
-      await this.wallet.put(login, x509Identity);
+
+      const temporaryWallet: Wallet = await EnrollService.buildWallet();
+      await temporaryWallet.put(username, x509Identity);
+      const contract: Contract = await getContract(username, 'IdentityContract', temporaryWallet);
+      const role = await contract.evaluateTransaction('GetRole');
+      console.log('role', role, role.toString());
+      await this.wallet.put(username, x509Identity);
+      return { role: role.toString() };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
   }
 
-  public async isUserEnrolled(login: string): Promise<boolean> {
-    console.log('isUserEnrolled', !!(await this.wallet.get(login)));
+  public async isUserEnrolled(username: string): Promise<boolean> {
+    console.log('isUserEnrolled', !!(await this.wallet.get(username)));
 
-    return !!(await this.wallet.get(login));
+    return !!(await this.wallet.get(username));
   }
 
   private static async buildWallet(): Promise<Wallet> {
