@@ -20,7 +20,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!isEnrolled) {
       return false;
     }
-    console.log('JwtStrategy', username, role);
     return { username, role };
   }
 }

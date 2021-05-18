@@ -5,6 +5,8 @@ import { getContract } from '../utils/gateway';
 import { JwtAuthGuard } from '../auth/passport/jwt-auth.guard';
 import { Roles } from '../auth/passport/roles.decorator';
 import { UserType } from '../models/user-type';
+import { Subject } from '../models/subject';
+import { Grade } from '../models/grade';
 
 @Controller('student')
 export class StudentsController {
@@ -13,7 +15,7 @@ export class StudentsController {
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('/subjects')
-  public async getSubjects(@Request() req) {
+  public async getSubjects(@Request() req): Promise<Subject[]> {
     const contract = await getContract(req.user.username, 'StudentContract', this.enrollService.wallet);
     if (!contract) return;
 
@@ -21,7 +23,7 @@ export class StudentsController {
       const result = await contract.evaluateTransaction('GetSubjects');
       return JSON.parse(result.toString());
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
   }
@@ -29,7 +31,7 @@ export class StudentsController {
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('subject/:subject')
-  public async getSubjectGrades(@Request() req, @Param('subject') subjectID: string) {
+  public async getSubjectGrades(@Request() req, @Param('subject') subjectID: string): Promise<Grade[]> {
     const contract = await getContract(req.user.username, 'StudentContract', this.enrollService.wallet);
     if (!contract) return;
 
@@ -37,7 +39,7 @@ export class StudentsController {
       const result = await contract.evaluateTransaction('GetGrades', subjectID);
       return JSON.parse(result.toString());
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
   }

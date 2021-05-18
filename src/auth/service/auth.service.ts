@@ -28,7 +28,6 @@ export class AuthService {
   }
 
   private async enrollUser(username: string, password: string): Promise<{ role: string }> {
-    console.log('enrolling', username, password);
     try {
       const enrollment = await this.caClient.enroll({
         enrollmentID: username,
@@ -51,7 +50,6 @@ export class AuthService {
       await temporaryWallet.put(username, x509Identity);
       const contract: Contract = await getContract(username, 'IdentityContract', temporaryWallet);
       const role = await contract.evaluateTransaction('GetRole');
-      console.log('enrollUser ', username, password, 'role', role.toString());
 
       await this.wallet.put(username, x509Identity);
       return { role: role.toString() };
@@ -61,23 +59,16 @@ export class AuthService {
   }
 
   public async isUserEnrolled(username: string): Promise<boolean> {
-    console.log('isUserEnrolled', !!(await this.wallet.get(username)));
-
     return !!(await this.wallet.get(username));
   }
 
   private static async buildWallet(): Promise<Wallet> {
-    const newWallet: Wallet = await Wallets.newInMemoryWallet();
-    console.log('Built an in memory wallet');
-    return newWallet;
+    return await Wallets.newInMemoryWallet();
   }
 
   private static buildCAClient(ccp: Record<string, any>, caHostName: string): FabricCAServices {
-    const caInfo = ccp.certificateAuthorities[caHostName]; // lookup CA details from config
+    const caInfo = ccp.certificateAuthorities[caHostName];
     const caTLSCACerts = caInfo.tlsCACerts.pem;
-    const caClient = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
-
-    console.log(`Built a CA Client named ${caInfo.caName}`);
-    return caClient;
+    return new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
   }
 }

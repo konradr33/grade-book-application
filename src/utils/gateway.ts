@@ -18,7 +18,7 @@ export async function getContract(username: string, contractName: string, wallet
     const network = await gateway.getNetwork(channelName);
     return network.getContract(chaincodeName, contractName);
   } catch (error) {
-    console.log('ERROR: ', error.message);
+    console.error('ERROR: ', error.message);
     return;
   }
 }
