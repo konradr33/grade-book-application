@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { UserType } from '../../models/user-type';
@@ -19,7 +19,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw err || new UnauthorizedException();
     }
     if (requiredRoles && !requiredRoles.some((role) => user.role === role)) {
-      throw new UnauthorizedException(`User has not a ${requiredRoles} role`);
+      throw new ForbiddenException(`User has not a ${requiredRoles} role`);
     }
     return user;
   }

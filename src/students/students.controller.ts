@@ -2,8 +2,8 @@ import { Controller, Get, HttpException, HttpStatus, Param, Request, UseGuards }
 
 import { AuthService } from '../auth/service/auth.service';
 import { getContract } from '../utils/gateway';
-import { JwtAuthGuard } from '../auth/passport/jwt-auth.guard';
-import { Roles } from '../auth/passport/roles.decorator';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { Roles } from '../auth/guard/roles.decorator';
 import { UserType } from '../models/user-type';
 import { Subject } from '../models/subject';
 import { Grade } from '../models/grade';

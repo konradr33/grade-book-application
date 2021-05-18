@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './controller/auth.controller';
 import { AuthService } from './service/auth.service';
 import { jwtConstants } from './constants/constants';
-import { JwtStrategy } from './passport/jwt.strategy';
+import { JwtStrategy } from './guard/jwt.strategy';
 
 @Module({
   controllers: [AuthController],
