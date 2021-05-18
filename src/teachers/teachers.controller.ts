@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
 import { getContract } from '../utils/gateway';
 import { AuthService } from '../auth/service/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -52,7 +52,33 @@ export class TeachersController {
 
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
-  @Get('/subjects/:subject')
+  @Put('/subjects/:subject')
+  public async updateSubject(
+    @Request() req,
+    @Param('subject') subjectID: string,
+    @Body() subjectDto: SubjectDto,
+  ): Promise<Subject> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    if (!contract) return;
+
+    try {
+      const result = await contract.submitTransaction(
+        'UpdateSubject',
+        subjectID,
+        subjectDto.name,
+        subjectDto.description ? subjectDto.description : '',
+        JSON.stringify(subjectDto.students),
+      );
+      return JSON.parse(result.toString());
+    } catch (error) {
+      console.error(error.message);
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Get('/subjects/:subject/grades')
   public async getSubjectGrades(@Request() req, @Param('subject') subjectID: string): Promise<Grade[]> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
     if (!contract) return;
@@ -68,7 +94,7 @@ export class TeachersController {
 
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
-  @Post('/subjects/:subject')
+  @Post('/subjects/:subject/grades')
   public async createGrade(
     @Request() req,
     @Param('subject') subjectID: string,
