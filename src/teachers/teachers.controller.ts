@@ -1,16 +1,35 @@
-import { Controller, Get, HttpException, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { WalletAuthGuard } from '../auth/passport/wallet-auth.guard';
+import { Controller, Get, HttpException, HttpStatus, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { getContract } from '../utils/gateway';
-import { EnrollService } from '../auth/enroll/enroll.service';
+import { AuthService } from '../auth/service/auth.service';
+import { JwtAuthGuard } from '../auth/passport/jwt-auth.guard';
+import { Roles } from '../auth/passport/roles.decorator';
+import { UserType } from '../models/user-type';
 
 @Controller('teachers')
 export class TeachersController {
-  constructor(private enrollService: EnrollService) {}
+  constructor(private enrollService: AuthService) {}
 
-  @UseGuards(WalletAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Get('/subjects')
+  public async getSubjects(@Request() req) {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    if (!contract) return;
+
+    try {
+      const result = await contract.evaluateTransaction('GetSubjects');
+      return JSON.parse(result.toString());
+    } catch (error) {
+      console.log(error.message);
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
   @Post('/subjects')
-  public async createSubject(@Query('username') username: string) {
-    const contract = await getContract(username, 'TeacherContract', this.enrollService.wallet);
+  public async createSubject(@Request() req) {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
     if (!contract) return;
 
     try {
@@ -30,25 +49,11 @@ export class TeachersController {
     }
   }
 
-  @UseGuards(WalletAuthGuard)
-  @Get('/subjects')
-  public async getSubjects(@Query('username') username: string) {
-    const contract = await getContract(username, 'TeacherContract', this.enrollService.wallet);
-    if (!contract) return;
-
-    try {
-      const result = await contract.evaluateTransaction('GetSubjects');
-      return JSON.parse(result.toString());
-    } catch (error) {
-      console.log(error.message);
-      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
-    }
-  }
-
-  @UseGuards(WalletAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
   @Get('/subjects/:subject')
-  public async getSubjectGrades(@Param('subject') subjectID: string, @Query('username') username: string) {
-    const contract = await getContract(username, 'TeacherContract', this.enrollService.wallet);
+  public async getSubjectGrades(@Request() req, @Param('subject') subjectID: string) {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
     if (!contract) return;
 
     try {
@@ -60,10 +65,11 @@ export class TeachersController {
     }
   }
 
-  @UseGuards(WalletAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
   @Post('/subjects/:subject')
-  public async createGrade(@Param('subject') subjectID: string, @Query('username') username: string) {
-    const contract = await getContract(username, 'TeacherContract', this.enrollService.wallet);
+  public async createGrade(@Request() req, @Param('subject') subjectID: string) {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
     if (!contract) return;
 
     try {

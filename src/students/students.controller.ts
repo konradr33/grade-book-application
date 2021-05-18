@@ -1,17 +1,20 @@
-import { Controller, Get, HttpException, HttpStatus, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Param, Request, UseGuards } from '@nestjs/common';
 
-import { EnrollService } from '../auth/enroll/enroll.service';
-import { WalletAuthGuard } from '../auth/passport/wallet-auth.guard';
+import { AuthService } from '../auth/service/auth.service';
 import { getContract } from '../utils/gateway';
+import { JwtAuthGuard } from '../auth/passport/jwt-auth.guard';
+import { Roles } from '../auth/passport/roles.decorator';
+import { UserType } from '../models/user-type';
 
 @Controller('student')
 export class StudentsController {
-  constructor(private enrollService: EnrollService) {}
+  constructor(private enrollService: AuthService) {}
 
-  @UseGuards(WalletAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.STUDENT)
   @Get('/subjects')
-  public async getSubjects(@Query('username') username: string) {
-    const contract = await getContract(username, 'StudentContract', this.enrollService.wallet);
+  public async getSubjects(@Request() req) {
+    const contract = await getContract(req.user.username, 'StudentContract', this.enrollService.wallet);
     if (!contract) return;
 
     try {
@@ -23,14 +26,15 @@ export class StudentsController {
     }
   }
 
-  @UseGuards(WalletAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.STUDENT)
   @Get('subject/:subject')
-  public async getSubjectGrades(@Param('subject') subject: string, @Query('username') username: string) {
-    const contract = await getContract(username, 'StudentContract', this.enrollService.wallet);
+  public async getSubjectGrades(@Request() req, @Param('subject') subjectID: string) {
+    const contract = await getContract(req.user.username, 'StudentContract', this.enrollService.wallet);
     if (!contract) return;
 
     try {
-      const result = await contract.evaluateTransaction('GetGrades', subject);
+      const result = await contract.evaluateTransaction('GetGrades', subjectID);
       return JSON.parse(result.toString());
     } catch (error) {
       console.log(error.message);
