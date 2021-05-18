@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { getContract } from '../utils/gateway';
 import { AuthService } from '../auth/service/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -25,7 +37,7 @@ export class TeachersController {
       return JSON.parse(result.toString());
     } catch (error) {
       console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -46,7 +58,7 @@ export class TeachersController {
       return JSON.parse(result.toString());
     } catch (error) {
       console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -72,7 +84,23 @@ export class TeachersController {
       return JSON.parse(result.toString());
     } catch (error) {
       console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Delete('/subjects/:subject')
+  public async deleteSubject(@Request() req, @Param('subject') subjectID: string): Promise<boolean> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    if (!contract) return;
+
+    try {
+      const result = await contract.submitTransaction('DeleteSubject', subjectID);
+      return JSON.parse(result.toString());
+    } catch (error) {
+      console.error(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -88,7 +116,7 @@ export class TeachersController {
       return JSON.parse(result.toString());
     } catch (error) {
       console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -114,7 +142,7 @@ export class TeachersController {
       return JSON.parse(result.toString());
     } catch (error) {
       console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }
