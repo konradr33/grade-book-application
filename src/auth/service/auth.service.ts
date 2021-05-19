@@ -21,10 +21,10 @@ export class AuthService {
     this.wallet = await AuthService.buildWallet();
   }
 
-  public async login(username: string, password: string): Promise<{ token: string; role: string }> {
+  public async login(username: string, password: string): Promise<{ username: string; token: string; role: string }> {
     const { role } = await this.enrollUser(username, password);
     const token = this.jwtService.sign({ username, role });
-    return { role, token };
+    return { username, role, token };
   }
 
   private async enrollUser(username: string, password: string): Promise<{ role: string }> {
