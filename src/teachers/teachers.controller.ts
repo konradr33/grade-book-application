@@ -9,11 +9,14 @@ import { GradeDto } from '../models/grade.dto';
 import { Subject } from '../models/subject';
 import { Grade } from '../models/grade';
 import { evaluateTransaction, submitTransaction } from '../utils/transaction';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { UpdateGradeDto } from '../models/update-grade.dto';
 
 @Controller('teachers')
 export class TeachersController {
   constructor(private enrollService: AuthService) {}
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Get('/subjects')
@@ -22,6 +25,7 @@ export class TeachersController {
     return await evaluateTransaction<Subject[]>(contract, 'GetSubjects');
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Post('/subjects')
@@ -36,6 +40,7 @@ export class TeachersController {
     );
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Get('/subjects/:subject')
@@ -44,6 +49,7 @@ export class TeachersController {
     return await evaluateTransaction<Subject>(contract, 'GetSubject', subjectID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Put('/subjects/:subject')
@@ -63,6 +69,7 @@ export class TeachersController {
     );
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Delete('/subjects/:subject')
@@ -71,6 +78,7 @@ export class TeachersController {
     return await submitTransaction<boolean>(contract, 'DeleteSubject', subjectID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Get('/subjects/:subject/grades')
@@ -79,6 +87,7 @@ export class TeachersController {
     return await evaluateTransaction<Grade[]>(contract, 'GetSubjectGrades', subjectID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Get('/subjects/:subject/history')
@@ -87,6 +96,7 @@ export class TeachersController {
     return await evaluateTransaction<Subject>(contract, 'GetSubjectHistory', subjectID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Post('/subjects/:subject/grades')
@@ -106,6 +116,7 @@ export class TeachersController {
     );
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Get('/grades/:grade')
@@ -114,18 +125,26 @@ export class TeachersController {
     return await evaluateTransaction<Grade>(contract, 'GetGrade', gradeID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Put('/grades/:grade')
   public async updateGrade(
     @Request() req,
     @Param('grade') gradeID: string,
-    @Body() gradeDto: Partial<GradeDto>,
+    @Body() updateGradeDto: UpdateGradeDto,
   ): Promise<Grade> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
-    return await submitTransaction<Grade>(contract, 'UpdateGrade', gradeID, gradeDto.grade, gradeDto.description);
+    return await submitTransaction<Grade>(
+      contract,
+      'UpdateGrade',
+      gradeID,
+      updateGradeDto.grade,
+      updateGradeDto.description,
+    );
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Delete('/grades/:grade')
@@ -134,6 +153,7 @@ export class TeachersController {
     return await submitTransaction<boolean>(contract, 'DeleteGrade', gradeID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.TEACHER)
   @Get('/grades/:grade/history')

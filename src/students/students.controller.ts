@@ -8,11 +8,13 @@ import { UserType } from '../models/user-type';
 import { Subject } from '../models/subject';
 import { Grade } from '../models/grade';
 import { evaluateTransaction } from '../utils/transaction';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('student')
 export class StudentsController {
   constructor(private enrollService: AuthService) {}
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('/subjects')
@@ -21,6 +23,7 @@ export class StudentsController {
     return await evaluateTransaction<Subject[]>(contract, 'GetSubjects');
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('subjects/:subject')
@@ -29,6 +32,7 @@ export class StudentsController {
     return await evaluateTransaction<Subject>(contract, 'GetSubject', subjectID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('subjects/:subject/grades')
@@ -37,6 +41,7 @@ export class StudentsController {
     return await evaluateTransaction<Grade[]>(contract, 'GetGrades', subjectID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('subjects/:subject/history')
@@ -45,6 +50,7 @@ export class StudentsController {
     return await evaluateTransaction<Subject[]>(contract, 'GetSubjectHistory', subjectID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('grades/:grade')
@@ -53,6 +59,7 @@ export class StudentsController {
     return await evaluateTransaction<Grade>(contract, 'GetGrade', gradeID);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Roles(UserType.STUDENT)
   @Get('grades/:grade/history')

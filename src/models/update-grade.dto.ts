@@ -1,12 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GradeDto {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  studentName: string;
-
+export class UpdateGradeDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
