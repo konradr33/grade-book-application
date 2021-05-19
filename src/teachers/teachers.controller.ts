@@ -3,7 +3,7 @@ import { getContract } from '../utils/gateway';
 import { AuthService } from '../auth/service/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { Roles } from '../auth/guard/roles.decorator';
-import { UserType } from '../models/user-type';
+import { UserRole } from '../models/user-role';
 import { SubjectDto } from '../models/subject.dto';
 import { GradeDto } from '../models/grade.dto';
 import { Subject } from '../models/subject';
@@ -18,7 +18,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Get('/subjects')
   public async getSubjects(@Request() req): Promise<Subject[]> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -27,7 +27,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Post('/subjects')
   public async createSubject(@Request() req, @Body() subjectDto: SubjectDto): Promise<Subject> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -42,7 +42,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Get('/subjects/:subject')
   public async getSubject(@Request() req, @Param('subject') subjectID: string): Promise<Subject> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -51,7 +51,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Put('/subjects/:subject')
   public async updateSubject(
     @Request() req,
@@ -71,7 +71,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Delete('/subjects/:subject')
   public async deleteSubject(@Request() req, @Param('subject') subjectID: string): Promise<boolean> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -80,7 +80,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Get('/subjects/:subject/grades')
   public async getSubjectGrades(@Request() req, @Param('subject') subjectID: string): Promise<Grade[]> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -89,7 +89,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Get('/subjects/:subject/history')
   public async getSubjectHistory(@Request() req, @Param('subject') subjectID: string): Promise<Subject> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -98,7 +98,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Post('/subjects/:subject/grades')
   public async createGrade(
     @Request() req,
@@ -118,7 +118,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Get('/grades/:grade')
   public async getGrade(@Request() req, @Param('grade') gradeID: string): Promise<Grade> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -127,7 +127,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Put('/grades/:grade')
   public async updateGrade(
     @Request() req,
@@ -146,7 +146,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Delete('/grades/:grade')
   public async deleteGrade(@Request() req, @Param('grade') gradeID: string): Promise<boolean> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
@@ -155,7 +155,7 @@ export class TeachersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Roles(UserType.TEACHER)
+  @Roles(UserRole.TEACHER)
   @Get('/grades/:grade/history')
   public async getGradeHistory(@Request() req, @Param('grade') gradeID: string): Promise<Grade[]> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);

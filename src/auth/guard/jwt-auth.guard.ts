@@ -1,7 +1,7 @@
 import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
-import { UserType } from '../../models/user-type';
+import { UserRole } from '../../models/user-role';
 import { ROLES_KEY } from './roles.decorator';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest(err, user, info, context: ExecutionContext) {
-    const requiredRoles = this.reflector.getAllAndOverride<UserType[]>(ROLES_KEY, [
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
