@@ -1,15 +1,17 @@
 export class Subject {
-  public ID: string;
+  ID: string;
 
-  public leader: string;
+  leader: string;
 
-  public students: string[];
+  students: string[];
 
-  public name: string;
+  name: string;
 
-  public description: string;
+  description: string;
 
-  public updatedAt: number;
+  removed?: boolean;
 
-  public createdAt: number;
+  updatedAt: number;
+
+  createdAt: number;
 }

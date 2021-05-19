@@ -7,6 +7,8 @@ export class Grade {
 
   description?: string;
 
+  removed?: boolean;
+
   updatedAt: number;
 
   createdAt: number;
