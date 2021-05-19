@@ -1,16 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpException,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
 import { getContract } from '../utils/gateway';
 import { AuthService } from '../auth/service/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -20,6 +8,7 @@ import { SubjectDto } from '../models/subject.dto';
 import { GradeDto } from '../models/grade.dto';
 import { Subject } from '../models/subject';
 import { Grade } from '../models/grade';
+import { evaluateTransaction, submitTransaction } from '../utils/transaction';
 
 @Controller('teachers')
 export class TeachersController {
@@ -30,15 +19,7 @@ export class TeachersController {
   @Get('/subjects')
   public async getSubjects(@Request() req): Promise<Subject[]> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
-    if (!contract) return;
-
-    try {
-      const result = await contract.evaluateTransaction('GetSubjects');
-      return JSON.parse(result.toString());
-    } catch (error) {
-      console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    return await evaluateTransaction<Subject[]>(contract, 'GetSubjects');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -46,20 +27,21 @@ export class TeachersController {
   @Post('/subjects')
   public async createSubject(@Request() req, @Body() subjectDto: SubjectDto): Promise<Subject> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
-    if (!contract) return;
+    return await submitTransaction<Subject>(
+      contract,
+      'CreateSubject',
+      subjectDto.name,
+      subjectDto.description ? subjectDto.description : '',
+      JSON.stringify(subjectDto.students),
+    );
+  }
 
-    try {
-      const result = await contract.submitTransaction(
-        'CreateSubject',
-        subjectDto.name,
-        subjectDto.description ? subjectDto.description : '',
-        JSON.stringify(subjectDto.students),
-      );
-      return JSON.parse(result.toString());
-    } catch (error) {
-      console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Get('/subjects/:subject')
+  public async getSubject(@Request() req, @Param('subject') subjectID: string): Promise<Subject> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    return await evaluateTransaction<Subject>(contract, 'GetSubject', subjectID);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -71,21 +53,14 @@ export class TeachersController {
     @Body() subjectDto: SubjectDto,
   ): Promise<Subject> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
-    if (!contract) return;
-
-    try {
-      const result = await contract.submitTransaction(
-        'UpdateSubject',
-        subjectID,
-        subjectDto.name,
-        subjectDto.description ? subjectDto.description : '',
-        JSON.stringify(subjectDto.students),
-      );
-      return JSON.parse(result.toString());
-    } catch (error) {
-      console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    return await submitTransaction<Subject>(
+      contract,
+      'UpdateSubject',
+      subjectID,
+      subjectDto.name,
+      subjectDto.description ? subjectDto.description : '',
+      JSON.stringify(subjectDto.students),
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -93,15 +68,7 @@ export class TeachersController {
   @Delete('/subjects/:subject')
   public async deleteSubject(@Request() req, @Param('subject') subjectID: string): Promise<boolean> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
-    if (!contract) return;
-
-    try {
-      const result = await contract.submitTransaction('DeleteSubject', subjectID);
-      return JSON.parse(result.toString());
-    } catch (error) {
-      console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    return await submitTransaction<boolean>(contract, 'DeleteSubject', subjectID);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -109,15 +76,15 @@ export class TeachersController {
   @Get('/subjects/:subject/grades')
   public async getSubjectGrades(@Request() req, @Param('subject') subjectID: string): Promise<Grade[]> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
-    if (!contract) return;
+    return await evaluateTransaction<Grade[]>(contract, 'GetSubjectGrades', subjectID);
+  }
 
-    try {
-      const result = await contract.evaluateTransaction('GetSubjectGrades', subjectID);
-      return JSON.parse(result.toString());
-    } catch (error) {
-      console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Get('/subjects/:subject/history')
+  public async getSubjectHistory(@Request() req, @Param('subject') subjectID: string): Promise<Subject> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    return await evaluateTransaction<Subject>(contract, 'GetSubjectHistory', subjectID);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -129,20 +96,49 @@ export class TeachersController {
     @Body() gradeDto: GradeDto,
   ): Promise<Grade> {
     const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
-    if (!contract) return;
+    return await submitTransaction<Grade>(
+      contract,
+      'CreateGrade',
+      subjectID,
+      gradeDto.studentName,
+      gradeDto.grade,
+      gradeDto.description,
+    );
+  }
 
-    try {
-      const result = await contract.submitTransaction(
-        'CreateGrade',
-        subjectID,
-        gradeDto.studentName,
-        gradeDto.grade,
-        gradeDto.description,
-      );
-      return JSON.parse(result.toString());
-    } catch (error) {
-      console.error(error.message);
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Get('/grades/:grade')
+  public async getGrade(@Request() req, @Param('grade') gradeID: string): Promise<Grade> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    return await evaluateTransaction<Grade>(contract, 'GetGrade', gradeID);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Put('/grades/:grade')
+  public async updateGrade(
+    @Request() req,
+    @Param('grade') gradeID: string,
+    @Body() gradeDto: Partial<GradeDto>,
+  ): Promise<Grade> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    return await submitTransaction<Grade>(contract, 'UpdateGrade', gradeID, gradeDto.grade, gradeDto.description);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Delete('/grades/:grade')
+  public async deleteGrade(@Request() req, @Param('grade') gradeID: string): Promise<boolean> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    return await submitTransaction<boolean>(contract, 'DeleteGrade', gradeID);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.TEACHER)
+  @Get('/grades/:grade/history')
+  public async getGradeHistory(@Request() req, @Param('grade') gradeID: string): Promise<Grade[]> {
+    const contract = await getContract(req.user.username, 'TeacherContract', this.enrollService.wallet);
+    return await evaluateTransaction<Grade[]>(contract, 'GetGradeHistory', gradeID);
   }
 }
