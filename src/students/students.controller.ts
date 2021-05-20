@@ -10,7 +10,7 @@ import { Grade } from '../models/grade';
 import { evaluateTransaction } from '../utils/transaction';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
-@Controller('student')
+@Controller('students')
 export class StudentsController {
   constructor(private enrollService: AuthService) {}
 
