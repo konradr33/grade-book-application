@@ -46,6 +46,8 @@ export class AuthService {
         type: 'X.509',
       };
 
+      console.log(enrollment.certificate);
+
       const temporaryWallet: Wallet = await AuthService.buildWallet();
       await temporaryWallet.put(username, x509Identity);
       const contract: Contract = await getContract(username, 'IdentityContract', temporaryWallet);
