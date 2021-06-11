@@ -46,7 +46,7 @@ export class IdentityController {
   @Get('students')
   public async getStudentList(@Request() req): Promise<UserData> {
     const contract = await getContract(req.user.username, 'IdentityContract', this.enrollService.wallet);
-    return await submitTransaction<UserData>(contract, 'GetStudentsList');
+    return await evaluateTransaction<UserData>(contract, 'GetStudentsList');
   }
 
   @ApiBearerAuth()
