@@ -3,7 +3,7 @@ import { UserData } from '../models/user-data';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { getContract } from '../utils/gateway';
-import { evaluateTransaction, submitTransaction } from '../utils/transaction';
+import { evaluateTransaction } from '../utils/transaction';
 
 import { AuthService } from '../auth/service/auth.service';
 import { Roles } from '../auth/guard/roles.decorator';
