@@ -5,7 +5,7 @@ export class UserData {
 
   public role: UserRole;
 
-  public name: string;
+  public firstName: string;
 
-  public surname: string;
+  public lastName: string;
 }

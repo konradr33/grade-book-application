@@ -11,10 +11,10 @@ export class UserDataDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  public name: string;
+  public firstName: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  public surname: string;
+  public lastName: string;
 }

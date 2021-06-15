@@ -12,7 +12,7 @@ import { JwtStrategy } from './guard/jwt.strategy';
   imports: [
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '6000s' },
+      signOptions: { expiresIn: '600s' },
     }),
   ],
   exports: [AuthService],
